@@ -1,0 +1,30 @@
+{
+  "allowed_domains": [
+    "gmail.com",
+    "outlook.com",
+    "yahoo.com"
+  ],
+  "blocked_domains": [
+    "muraii.com"
+  ],
+
+  "mailbox": "INBOX",
+  "mark_seen": true,
+  "poll_interval_seconds": 60,
+
+  "company_name": "Muraai Information Technologies Pvt Ltd",
+
+  "internship": "Intern",
+
+  "walkin_date": "31 July 2026",
+
+  "walkin_time": "10:00 AM",
+
+  "walkin_location": "https://maps.app.goo.gl/4PMZVzkMukPnHue18",
+
+  "reply_subject": "Acknowledgement Mail for {internship} Application",
+
+  "log_file": "mail_agent.log",
+
+  "processed_ids_file": "processed_ids.json"
+}

@@ -1,0 +1,5 @@
+.env
+processed_ids.json
+mail_agent.log
+__pycache__/
+*.pyc
