@@ -4,6 +4,7 @@ import email
 import os
 import json
 import logging
+import socket
 import time
 from email.message import EmailMessage
 from email.header import decode_header
@@ -238,6 +239,11 @@ HR Team
 # ─── SMTP: send acknowledgement ──────────────────────────────────────────────
 
 def send_acknowledgement(mail: dict, ack_body: str):
+    try:
+        socket.create_connection(("smtp.gmail.com", 587), timeout=10)
+        log.info("SMTP is reachable")
+    except Exception:
+        log.exception("SMTP connectivity test failed")
     """Send acknowledgement reply via SMTP."""
     msg = EmailMessage()
     msg["From"] = CONFIG["email_address"]
