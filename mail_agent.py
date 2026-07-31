@@ -11,7 +11,8 @@ from email.header import decode_header
 from datetime import datetime
 import requests  # for Ollama HTTP API (local)
 from email.utils import parseaddr
-
+import ssl
+import socket
 import json
 import os
 from dotenv import load_dotenv
@@ -237,41 +238,47 @@ HR Team
 """
 
 # ─── SMTP: send acknowledgement ──────────────────────────────────────────────
-
 def send_acknowledgement(mail: dict, ack_body: str):
+    """Send acknowledgement reply via Gmail SMTP SSL."""
+
+    # Test connectivity
     try:
-        socket.create_connection(("smtp.gmail.com", 587), timeout=10)
+        socket.create_connection(("smtp.gmail.com", 465), timeout=10)
         log.info("SMTP is reachable")
     except Exception:
         log.exception("SMTP connectivity test failed")
-    """Send acknowledgement reply via SMTP."""
+        return
+
     msg = EmailMessage()
     msg["From"] = CONFIG["email_address"]
     msg["To"] = mail["from"]
     msg["Subject"] = CONFIG["reply_subject"].format(
-    internship=CONFIG["internship"]
+        internship=CONFIG["internship"]
     )
     msg["In-Reply-To"] = mail.get("message_id", "")
     msg.set_content(ack_body)
 
-    log.info("Sending acknowledgement to %s…", mail["from"])
+    log.info("Sending acknowledgement to %s...", mail["from"])
 
     try:
-        if CONFIG["smtp_use_tls"]:
-            with smtplib.SMTP(CONFIG["smtp_host"], CONFIG["smtp_port"]) as server:
-                server.ehlo()
-                server.starttls()
-                server.login(CONFIG["smtp_user"], CONFIG["smtp_password"])
-                server.send_message(msg)
-        else:
-            with smtplib.SMTP(CONFIG["smtp_host"], CONFIG["smtp_port"]) as server:
-                server.send_message(msg)
+        context = ssl.create_default_context()
 
-        log.info("Acknowledgement sent to %s ", mail["from"])
+        with smtplib.SMTP_SSL(
+            "smtp.gmail.com",
+            465,
+            context=context,
+            timeout=30
+        ) as server:
+            server.login(
+                CONFIG["smtp_user"],
+                CONFIG["smtp_password"]
+            )
+            server.send_message(msg)
 
-    except Exception as exc:
-        log.error("Failed to send acknowledgement to %s: %s", mail["from"], exc)
+        log.info("Acknowledgement sent successfully to %s", mail["from"])
 
+    except Exception:
+        log.exception("Failed to send acknowledgement to %s", mail["from"])
 
 # ─── Main loop ───────────────────────────────────────────────────────────────
 
